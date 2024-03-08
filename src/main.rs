@@ -1,11 +1,10 @@
 use clap::{Parser, Subcommand};
 
+use todo_rs::Todos;
+
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
-    #[arg(short, long)]
-    debug: bool,
-
     #[command(subcommand)]
     command: Option<Commands>,
 }
@@ -13,20 +12,35 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Add a new todo
-    Add {
-        name: String
-    },
+    Add { content: String },
     /// Mark as done
-    Done {
-        name: String
-    },
+    Done { index: u16 },
     /// Remove a todo
-    Remove {
-        name: String
-    },
+    Remove { index: u16 },
 }
 
 fn main() {
-    println!("Hello, world!");
     let cli = Cli::parse();
+    let mut todo = Todos::new();
+
+    todo.add(String::from("Hello there"));
+    todo.add(String::from("Hello there"));
+    todo.add(String::from("Hello there"));
+    todo.add(String::from("Hello there"));
+
+    todo.mark_done(1);
+    todo.remove(1);
+    match &cli.command.unwrap() {
+        Commands::Add { content } => {
+            todo.add(content.clone());
+        }
+        Commands::Remove { index } => {
+            todo.remove(index.clone());
+        }
+        Commands::Done { index } => {
+            todo.mark_done(index.clone());
+        }
+    }
+
+    println!("{}", todo)
 }
