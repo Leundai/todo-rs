@@ -17,30 +17,36 @@ enum Commands {
     Done { index: u16 },
     /// Remove a todo
     Remove { index: u16 },
+    /// Show todos
+    List,
 }
 
 fn main() {
     let cli = Cli::parse();
-    let mut todo = Todos::new();
+    let mut todos = Todos::new();
 
-    todo.add(String::from("Hello there"));
-    todo.add(String::from("Hello there"));
-    todo.add(String::from("Hello there"));
-    todo.add(String::from("Hello there"));
+    // todos.add(String::from("Hello there"));
+    // todos.add(String::from("Hello there"));
+    // todos.add(String::from("Hello there"));
+    // todos.add(String::from("Hello there"));
 
-    todo.mark_done(1);
-    todo.remove(1);
-    match &cli.command.unwrap() {
-        Commands::Add { content } => {
-            todo.add(content.clone());
-        }
-        Commands::Remove { index } => {
-            todo.remove(index.clone());
-        }
-        Commands::Done { index } => {
-            todo.mark_done(index.clone());
+    // todos.mark_done(1);
+    // todos.remove(1);
+
+    if let Some(command) = &cli.command {
+        match command {
+            Commands::Add { content } => {
+                todos.add(content.clone());
+            }
+            Commands::Remove { index } => {
+                todos.remove(index.clone());
+            }
+            Commands::Done { index } => {
+                todos.mark_done(index.clone());
+            }
+            Commands::List {} => {
+                println!("{}", todos)
+            }
         }
     }
-
-    println!("{}", todo)
 }
