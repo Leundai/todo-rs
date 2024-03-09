@@ -82,7 +82,7 @@ impl fmt::Display for Todos {
             .done
             .iter()
             .enumerate()
-            .map(|(index, todo)| format!("{} {} ✅", index.to_string().bold(), todo.content))
+            .map(|(index, todo)| format!("{} {}", index.to_string().bold(), todo.content))
             .collect::<Vec<String>>()
             .join("\n");
 
