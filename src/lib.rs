@@ -46,7 +46,7 @@ impl Todos {
 
     pub fn remove(&mut self, index: u16) -> Result<()> {
         if index as usize >= self.list.len() {
-            return Err(anyhow!("Provided index doesn't exist"))
+            return Err(anyhow!("Provided index doesn't exist"));
         }
         self.list.remove(index.into());
         self.save()?;
@@ -55,7 +55,7 @@ impl Todos {
 
     pub fn mark_done(&mut self, index: u16) -> Result<()> {
         if index as usize >= self.list.len() {
-            return Err(anyhow!("Provided index doesn't exist"))
+            return Err(anyhow!("Provided index doesn't exist"));
         }
 
         let mut todo = self.list.remove(index.into());

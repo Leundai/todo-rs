@@ -32,19 +32,28 @@ fn main() {
     if let Some(command) = &cli.command {
         match command {
             Commands::Add { content } => {
-                todos.add(content.clone()).unwrap_or_else(|e| println!("Failed to add todo: {}", e));
+                todos
+                    .add(content.clone())
+                    .unwrap_or_else(|e| println!("Failed to add todo: {}", e));
             }
             Commands::Remove { index } => {
-                todos.remove(index.clone()).unwrap_or_else(|e| println!("Failed to remove todo: {}", e));
+                todos
+                    .remove(index.clone())
+                    .unwrap_or_else(|e| println!("Failed to remove todo: {}", e));
             }
             Commands::Done { index } => {
-                todos.mark_done(index.clone()).unwrap_or_else(|e| println!("Failed to mark as done: {}", e));
+                todos
+                    .mark_done(index.clone())
+                    .unwrap_or_else(|e| println!("Failed to mark as done: {}", e));
             }
             Commands::List { all } => {
                 todos.print(all.clone());
             }
         }
     } else {
-        println!("Please provide a command. Run {} for more info", "--help".italic());
+        println!(
+            "Please provide a command. Run {} for more info",
+            "--help".italic()
+        );
     }
 }
