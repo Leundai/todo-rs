@@ -1,7 +1,6 @@
+use anyhow::{anyhow, Result};
 use colored::Colorize;
-use log::{debug, error};
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::{
     fs::File,
     io::{Read, Write},
@@ -20,84 +19,77 @@ pub struct Todos {
 }
 
 impl Todos {
-    pub fn new() -> Todos {
+    pub fn new() -> Result<Todos, anyhow::Error> {
         let mut new_todos = Todos {
             list: Vec::new(),
             done: Vec::new(),
         };
 
-        let saved = File::open("todo_db");
+        let mut saved = File::open("todo_db")?;
         let mut contents = String::new();
-        let _ = saved.unwrap().read_to_string(&mut contents);
+        saved.read_to_string(&mut contents)?;
         if let Ok(saved_todos) = serde_json::from_str::<Todos>(&contents) {
             new_todos.list = saved_todos.list;
             new_todos.done = saved_todos.done;
         };
-
-        new_todos
+        Ok(new_todos)
     }
-    pub fn add(&mut self, content: String) {
+    pub fn add(&mut self, content: String) -> Result<()> {
         let todo = Todo {
             content,
             done: false,
         };
         self.list.push(todo);
-        self.save();
+        self.save()?;
+        Ok(())
     }
 
-    pub fn remove(&mut self, index: u16) {
-        self.list.remove(index.into());
-        self.save();
-    }
-
-    pub fn mark_done(&mut self, index: u16) {
+    pub fn remove(&mut self, index: u16) -> Result<()> {
         if index as usize >= self.list.len() {
-            error!("Given index is larger than todo list");
-            return;
+            return Err(anyhow!("Provided index doesn't exist"))
+        }
+        self.list.remove(index.into());
+        self.save()?;
+        Ok(())
+    }
+
+    pub fn mark_done(&mut self, index: u16) -> Result<()> {
+        if index as usize >= self.list.len() {
+            return Err(anyhow!("Provided index doesn't exist"))
         }
 
         let mut todo = self.list.remove(index.into());
         todo.done = true;
         self.done.push(todo);
-        self.save();
+        self.save()?;
+        Ok(())
     }
 
-    fn save(&mut self) {
-        let saved_serde = serde_json::to_string(&self).unwrap();
-        let file = File::create("todo_db");
-        let _ = file.unwrap().write_all(saved_serde.as_bytes());
+    pub fn print(&self, all: bool) {
+        let todos_fmt = self.format_tasks(&self.list);
+        println!("{}", "Todos".bold());
+        println!("{}", todos_fmt);
+        println!("");
+        if all {
+            let done_fmt = self.format_tasks(&self.done);
+            println!("{}", "Done".bold());
+            println!("{}", done_fmt);
+        }
     }
-}
 
-impl fmt::Display for Todos {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let todos_fmt = self
-            .list
+    fn save(&mut self) -> Result<()> {
+        let saved_serde = serde_json::to_string(&self)?;
+        let mut file = File::create("todo_db")?;
+        file.write_all(saved_serde.as_bytes())?;
+        Ok(())
+    }
+
+    fn format_tasks(&self, tasks: &Vec<Todo>) -> String {
+        tasks
             .iter()
             .enumerate()
             .map(|(index, todo)| format!("{} {}", index.to_string().bold(), todo.content))
             .collect::<Vec<String>>()
-            .join("\n");
-        let done_fmt = self
-            .done
-            .iter()
-            .enumerate()
-            .map(|(index, todo)| format!("{} {}", index.to_string().bold(), todo.content))
-            .collect::<Vec<String>>()
-            .join("\n");
-
-        let result = format!(
-            "\
-            {}\n\
-            {}\n\
-            \n\n\
-            {}\n\
-            {}",
-            "Pending".bold(),
-            todos_fmt,
-            "Done".bold(),
-            done_fmt
-        );
-        write!(f, "{}", result)
+            .join("\n")
     }
 }

@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 
+use colored::Colorize;
 use todo_rs::Todos;
 
 #[derive(Parser)]
@@ -18,35 +19,32 @@ enum Commands {
     /// Remove a todo
     Remove { index: u16 },
     /// Show todos
-    List,
+    List {
+        #[arg(short, long)]
+        all: bool,
+    },
 }
 
 fn main() {
     let cli = Cli::parse();
-    let mut todos = Todos::new();
-
-    // todos.add(String::from("Hello there"));
-    // todos.add(String::from("Hello there"));
-    // todos.add(String::from("Hello there"));
-    // todos.add(String::from("Hello there"));
-
-    // todos.mark_done(1);
-    // todos.remove(1);
+    let mut todos = Todos::new().expect("Failed to load todos!");
 
     if let Some(command) = &cli.command {
         match command {
             Commands::Add { content } => {
-                todos.add(content.clone());
+                todos.add(content.clone()).unwrap_or_else(|e| println!("Failed to add todo: {}", e));
             }
             Commands::Remove { index } => {
-                todos.remove(index.clone());
+                todos.remove(index.clone()).unwrap_or_else(|e| println!("Failed to remove todo: {}", e));
             }
             Commands::Done { index } => {
-                todos.mark_done(index.clone());
+                todos.mark_done(index.clone()).unwrap_or_else(|e| println!("Failed to mark as done: {}", e));
             }
-            Commands::List {} => {
-                println!("{}", todos)
+            Commands::List { all } => {
+                todos.print(all.clone());
             }
         }
+    } else {
+        println!("Please provide a command. Run {} for more info", "--help".italic());
     }
 }
