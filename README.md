@@ -1,2 +1,2 @@
 # todo-rs
-Rust Todo CLI
+Rust Todo CLI for learning rust
